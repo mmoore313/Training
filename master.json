@@ -1,0 +1,162 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "adminUsername": {
+      "type": "string",
+      "metadata": {
+        "description": "Username for the Virtual Machine."
+      }
+    },
+    "adminPassword": {
+      "type": "securestring",
+      "metadata": {
+        "description": "Password for the Virtual Machine."
+      }
+    },
+    "NamePrefix": {
+      "type": "string",
+      "metadata": {
+        "description": "Naming prefix for each VM name. 8-char max, lowercase alpha and numeric"
+      },
+      "defaultValue": "ACTSDEMO"
+    },
+    "dnsLabelPrefix": {
+      "type": "string",
+      "metadata": {
+        "description": "Unique DNS Name for the Public IP used to access the Virtual Machine."
+      }
+    },
+    "VMSize": {
+      "type": "string",
+      "allowedValues": [
+        "Standard_D1",
+        "Standard_DS1",
+        "Standard_D2",
+        "Standard_DS2",
+        "Standard_D3",
+        "Standard_DS3",
+        "Standard_D4",
+        "Standard_DS4",
+        "Standard_D11",
+        "Standard_DS11",
+        "Standard_D12",
+        "Standard_DS12",
+        "Standard_D13",
+        "Standard_DS13",
+        "Standard_D14",
+        "Standard_DS14"
+      ],
+      "metadata": {
+        "description": "Size of the VM instance to be created"
+      },
+      "defaultValue": "Standard_D1"
+    },
+    "windowsOSVersion": {
+      "type": "string",
+      "defaultValue": "2012-R2-Datacenter",
+      "allowedValues": [
+        "2008-R2-SP1",
+        "2012-Datacenter",
+        "2012-R2-Datacenter"
+      ],
+      "metadata": {
+        "description": "The Windows version for the VM. This will pick a fully patched image of this given Windows version. Allowed values: 2008-R2-SP1, 2012-Datacenter, 2012-R2-Datacenter."
+      }
+    },
+    "vnetAddress": {
+      "type": "string",
+      "defaultValue": "10.0.0.0/16",
+      "metadata": {
+        "description": "Address "
+      }
+    },
+    "subnet1": {
+      "type": "string",
+      "defaultValue": "10.0.0.0/24",
+      "metadata": {
+        "description": "Subnet 1 "
+      }
+    },
+    "subnet1Name": {
+      "type": "string",
+      "defaultValue": "Subnet1",
+      "metadata": {
+        "description": "Subnet 1 Name"
+      }
+    },
+    "subnet2": {
+      "type": "string",
+      "defaultValue": "10.0.1.0/24",
+      "metadata": {
+        "description": "Subnet 2 "
+      }
+    },
+    "subnet2Name": {
+      "type": "string",
+      "defaultValue": "Subnet2",
+      "metadata": {
+        "description": "Subnet 2 Name"
+      }
+    },
+    "templateurl": {
+      "type": "string",
+      "defaultValue": "https://raw.githubusercontent.com/mmoore313/Training/",
+      "metadata": {
+        "description": "Enter the Github URL"
+      }
+    }
+  },
+  "variables": {
+    "apiVersion": "2016-06-30",
+    "networkname": "[concat(parameters('NamePrefix'),'-VNET')]",
+    "vnetdeploy": "vnetdeploy",
+    "vmdeploy": "vmdeploy",
+    "vnettemplateurl": "[concat(parameters('templateurl'),'/vnet.json')]",
+    "vmtemplateurl": "[concat(parameters('templateurl'),'/2012R2-Nodomain.json')]"
+  },
+  "resources": [
+    {
+      "name": "[variables('vnetdeploy')]",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "[variables('apiVersion')]",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[variables('vnettemplateurl')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "vnetName": { "value": "[variables('networkname')]" },
+          "vnetAddress": { "value": "[parameters('vnetAddress')]" },
+          "subnet1": { "value": "[parameters('subnet1')]" },
+          "subnet2": { "value": "[parameters('subnet2')]" }
+        }
+      }
+    },
+    {
+      "name": "[variables('vmdeploy')]",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "[variables('apiVersion')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', variables('vnetdeploy'))]"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[variables('vmtemplateurl')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "adminUsername": { "value": "[parameters('adminUsername')]" },
+          "adminPassword": { "value": "[parameters('adminPassword')]" },
+          "NamePrefix": { "value": "[parameters('NamePrefix')]" },
+          "dnsLabelPrefix": { "value": "[parameters('dnsLabelPrefix')]" },
+          "VMSize": { "value": "[parameters('VMSize')]" },
+          "subnetname": { "value": "[parameters('subnet1Name')]" },
+          "windowsOSVersion": { "value": "[parameters('windowsOSVersion')]" }
+        }
+      }
+    }
+  ]
+}
