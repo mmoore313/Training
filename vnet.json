@@ -65,13 +65,13 @@
           {
             "name": "[parameters('subnet1Name')]",
             "properties": {
-              "address": "[parameters('subnet1')]"
+              "addressPrefix": "[parameters('subnet1')]"
             }
           },
           {
             "name": "[parameters('subnet2Name')]",
             "properties": {
-              "address": "[parameters('subnet2')]"
+              "addressPrefix": "[parameters('subnet2')]"
             }
           }
         ]
