@@ -46,7 +46,8 @@
     }
   },
   "variables": {
-    "apiVersion": "2016-06-01"
+    "apiVersion": "2015-06-15",
+    "location":  "East US 2"
   },
   "resources": [
     {
@@ -56,7 +57,7 @@
       "location": "[resourceGroup().location]",
       "properties": {
         "addressSpace": {
-          "addresses": [
+          "addressPrefixes": [
             "[parameters('vnetAddress')]"
           ]
         },
